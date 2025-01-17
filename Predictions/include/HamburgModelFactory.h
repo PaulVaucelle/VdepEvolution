@@ -42,7 +42,7 @@ class HamburgModelFactory {
     void runSimuForAvgModules(bool drawNeff); // Idem, but for avg module per layer simu
     void drawLumiTempScenario(); // plots filled in runSimuForAllModules() and not in readLumiTempScenario()
     void saveSensorSimuInTree(std::string filename);
-
+    // void drawVdepFinalvsTime(int layer, float[10][40] vdep_detid);
     
   private:
     

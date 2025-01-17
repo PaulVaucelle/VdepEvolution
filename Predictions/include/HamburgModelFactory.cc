@@ -1,13 +1,19 @@
 #include "HamburgModelFactory.h"
 #include "TH1D.h"
+#include "TH2D.h"
 #include "TGraph.h"
 #include "TF1.h"
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "TString.h"
+// #include "tdrstyle.C"
+// #include "../CMS_lumi.C"
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include "TLatex.h"
+#include "TPaveText.h"
+#include "TLine.h"
 
 
 // set input tree reading
@@ -88,6 +94,7 @@ void HamburgModelFactory::readLumiTempScenario(std::string filename="realistic_s
             StepInYear.push_back(stepInYear);
             SqrtS.push_back(sqrtS);
             Lumi.push_back(lumi);
+            
             Temp.push_back(temperature);
             if(lumi>0 or LVfraction>0.5) Active.push_back(1);
             else Active.push_back(0);
@@ -334,7 +341,7 @@ void HamburgModelFactory::simulateSensorEvolution(int detid_){
     } //end loop over periods VDEP
     
     std::cout << " total Feq " << total_Feq << std::endl;
-
+    
 }
 
 
@@ -362,7 +369,11 @@ void HamburgModelFactory::drawSaveSensorSimu(bool print_plots=false){
     
     TGraph * lumigr = new TGraph(maxTime);
     TGraph * feqgr = new TGraph(maxTime);
-    
+    TGraph * timegr = new TGraph();
+
+    TGraph * Vdep_0v1 = new TGraph();
+    std::ofstream ofs ("./deltavfd_"+std::to_string(detid)+".txt", std::ofstream::out);
+    // std::ofstream StoreVinit ("./Vinit_"+std::to_string(detid)+".txt", std::ofstream::out);
     for(Int_t i = 0; i<Nperiods; i++){
         
         //if(i>200) std::cout << i+1 <<" "<<Temp_evol[i]<<" "<<I_leak[i]<<std::endl;
@@ -379,15 +390,35 @@ void HamburgModelFactory::drawSaveSensorSimu(bool print_plots=false){
         
         lumigr->SetPoint(i, intLumi[i], U[i]);
         feqgr->SetPoint(i, intFeq[i], U[i]);
+        timegr->SetPoint(i, (i+1)*periodInDays-5736, U[i]);
         if(i==Nperiods-1) std::cout << " total Feq " << intFeq[i] << std::endl;
 
     }
+    ofs << U[0] << " " << U[Nperiods-1]<<std::endl;
+    //StoreVinit <<U[0]<<std::endl;
+    Vdep_0v1->SetPoint(0,0,U[0]);
+    Vdep_0v1->SetPoint(Nperiods-1,0,U[Nperiods-1]);
     
     //gStyle->SetTitleX(0.1f);
     //gStyle->SetTitleW(0.8f);
     gStyle->SetLineColor(kWhite);
     gStyle->SetOptStat(0);
-    
+    	    gStyle->SetPadTickX(1);//$$$$$$$  // To get tick marks on the opposite side of the frame
+        gStyle->SetPadTickY(1);//$$$$$$$
+
+          gStyle->SetTitleFont(42, "XYZ");
+  gStyle->SetTitleSize(0.06, "XYZ");
+  gStyle->SetTitleXOffset(0.7);
+  gStyle->SetTitleYOffset(0.7);
+  gStyle->SetLabelColor(1, "XYZ");
+  gStyle->SetLabelFont(42, "XYZ");
+  gStyle->SetLabelOffset(0.007, "XYZ");
+  gStyle->SetLabelSize(0.035, "XYZ");
+  gStyle->SetCanvasDefH(800); //Height of canvas
+   gStyle->SetLineWidth(4);
+//   gStyle->SetTitleSize(10,"X");
+//    gStyle->SetTitleSize(10,"Y");
+  gStyle->SetCanvasDefW(1350); //Width of canvas
     TCanvas * c1 = new TCanvas();
     TString title, name;
     if(print_plots) {
@@ -402,33 +433,43 @@ void HamburgModelFactory::drawSaveSensorSimu(bool print_plots=false){
          h_T_years->GetYaxis()->SetTitle("Temperature (#circC)");
          h_T_years->GetYaxis()->SetTitleOffset(1.2);
          h_T_years->DrawCopy();
-         name.Form("VdepEvol_T_mod_%s_%i.png", pg, detid);
+         name.Form("VdepEvol_T_mod_%s%i.png", pg, detid);
          c1->SaveAs(name);*/
         
-        
-        TCanvas * c2 = new TCanvas();
+        	if (detid<=4)
+    		{
+
+                        TCanvas * c2 = new TCanvas();
         c2->cd();
-        title.Form("Module temperature (%s, DETID: %i)", pg , detid);
-        h_T->SetTitle(title);
+
+        title.Form("Module temperature (%s, DETID: %i)", "TIB_L" , detid);
+        // h_T->SetTitle(title);
+        h_T->SetLineColor(kBlack);
         h_T->GetXaxis()->SetTitle("Time (steps)");
         h_T->GetYaxis()->SetTitle("Temperature (#circK)");
         h_T->DrawCopy();
-        name.Form("VdepEvol_T_%s_%i.png", pg, detid);
-        c2->SaveAs(name);
+        name.Form("VdepEvol_T_%s%i.root", "TIB_L", detid);
+        
+        // c2->SaveAs(name);
+	h_T->SetLabelOffset(0.007,"Y");
         h_T->SetName(Form("T_%i", detid));
         h_T->Write();
-        
+        h_T->SaveAs(name);
         
         TCanvas * c3 = new TCanvas();
         c3->cd();
-        title.Form("Corrected leakage current (%s, DETID: %i)", pg, detid);
-        h_I_leak_corr->SetTitle(title);
+	//setTDRStyle();
+        title.Form("Corrected leakage current (%s, DETID: %i)", "TIB_L", detid);
+        // h_I_leak_corr->SetTitle(title);
+        h_I_leak_corr->SetLineColor(kBlack);
         h_I_leak_corr->GetXaxis()->SetTimeDisplay(1);
         h_I_leak_corr->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
         h_I_leak_corr->GetXaxis()->SetTitle("Time");
-        h_I_leak_corr->GetYaxis()->SetTitle("Leakage current (mA)");
+        h_I_leak_corr->GetYaxis()->SetTitle("Leakage current [mA]");
         h_I_leak_corr->DrawCopy();
-        name.Form("VdepEvol_Ileak_%s_%i.png", pg, detid);
+        name.Form("VdepEvol_Ileak_%s%i.png", "TIB_L", detid);
+       
+        //t->Draw();
         c3->SaveAs(name);
         h_I_leak_corr->SetName(Form("Ileak_%i", detid));
         h_I_leak_corr->Write();
@@ -436,23 +477,40 @@ void HamburgModelFactory::drawSaveSensorSimu(bool print_plots=false){
         
         TCanvas * c4 = new TCanvas();
         c4->cd();
-        title.Form("Full depletion voltage (%s, DETID: %i)", pg, detid);
-        h_U->SetTitle(title);
-        h_U->GetXaxis()->SetTimeDisplay(1);
-        h_U->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+			title.Form("Full depletion voltage (%s%i)", "TIB_L", detid);
+
+
+        h_U->SetLineColor(kBlack);
+        h_U->SetLineWidth(4);
         h_U->GetXaxis()->SetTitle("Time");
-        h_U->GetYaxis()->SetTitle("Full depletion voltage (V)");
+        h_U->GetYaxis()->SetTitle("Full depletion voltage [ V ]");
+        h_U->GetYaxis()->SetRangeUser(0,350);
+
+    
         h_U->DrawCopy();
-        name.Form("VdepEvol_Vdep_%s_%i.png", pg, detid);
-        c4->SaveAs(name);
+
+        name.Form("VdepEvol_Vdep_%s%i.root", "TIB_L", detid);
+
+        
+        //t->Draw();
+        if (detid == 1){h_U->SaveAs("Vdep_L1.root");h_U->SaveAs("Vdep_L1.c");}
+        
         h_U->SetName(Form("Vdep_%i", detid));
         h_U->Write();
-        
-        
-        TCanvas * c5 = new TCanvas();
+                 TLine *line = new TLine(10,65,10,350);
+        line->SetLineStyle(3);
+        line->Draw();
+        c4->SaveAs(name);
+
+
+                TCanvas * c5 = new TCanvas();
         c5->cd();
-        title.Form("Effective space charge (%s, DETID: %i)", pg, detid);
-        h_N->SetTitle(title);
+
+
+
+
+        title.Form("Effective space charge (%s, DETID: %i)", "TIB_L", detid);
+        // h_N->SetTitle(title);
         //	h_N->GetXaxis()->SetTimeDisplay(1);
         //	h_N->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
         h_N->GetXaxis()->SetTitle("Time (steps)");
@@ -464,7 +522,9 @@ void HamburgModelFactory::drawSaveSensorSimu(bool print_plots=false){
         h_Na->DrawCopy("SAME");
         h_NY->SetLineColor(kRed);
         h_NY->DrawCopy("SAME");
-        name.Form("VdepEvol_Ncontrib_%s_%i.png", pg, detid);
+        name.Form("VdepEvol_Ncontrib_%s%i.png", "TIB_L", detid);
+               
+        //t->Draw();
         c5->SaveAs(name);
         h_N->SetName(Form("N_%i", detid));
         h_N->Write();
@@ -477,44 +537,571 @@ void HamburgModelFactory::drawSaveSensorSimu(bool print_plots=false){
         
         
         c5->cd();
-        title.Form("Effective space charge contributions (%s, DETID: %i)", pg, detid);
-        h_N->SetTitle(title);
+        title.Form("Effective space charge contributions (%s, DETID: %i)", "TIB_L", detid);
+        // h_N->SetTitle(title);
+        //	h_N-dGetXaxis()->SetTimeDisplay(1);
+        //	h_N->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_N->GetXaxis()->SetTitle("Time [steps]");
+        h_N->GetYaxis()->SetTitle("Effective space charge [cm-3]");
+        h_N->DrawCopy();
+        name.Form("VdepEvol_Neff_%s%i.png", "TIB_L", detid);
+              
+        //t->Draw();
+        c5->SaveAs(name);
+            TCanvas * cgr = new TCanvas();
+    cgr->cd();
+    //setTDRStyle();
+    
+
+    title.Form("Vdep vs Lumi, %s%i", "TIB_L", detid);
+    name.Form("VdepEvol_VdepvsLumi_%s%i.root", "TIB_L", detid);
+    
+    lumigr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage [ V ]");
+    lumigr->GetHistogram()->GetXaxis()->SetTitle("Integrated luminosity [ fb^{ -1} ]");
+        lumigr->GetHistogram()->GetYaxis()->SetRangeUser(0,350);
+    lumigr->GetHistogram()->GetXaxis()->SetRangeUser(0,600);
+    // lumigr->SetTitle(title);
+    lumigr->SetName(name);
+    lumigr->SetLineColor(1);
+    lumigr->SetLineWidth(4);
+    lumigr->Draw("alp");
+         
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    lumigr->SetName(Form("lumigr_%s%i", "TIB_L", detid));
+    lumigr->SaveAs(Form("lumigr_%s%i.root", "TIB_L", detid));
+    lumigr->Write();
+    
+    title.Form("Vdep vs Fluence,%s%i", "TIB_L", detid);
+    name.Form("VdepEvol_VdepvsFeq_%s%i.png", "TIB_L", detid);
+    feqgr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage [ V ]");
+    feqgr->GetHistogram()->GetXaxis()->SetTitle("Fluence [1MeV neq/cm^{-2}]");
+    // feqgr->SetTitle(title);
+    feqgr->SetName(name);
+    feqgr->SetLineColor(1);
+    feqgr->Draw("alp");
+     
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    feqgr->SetName(Form("feqgr_%i", detid));
+    feqgr->Write();
+    
+    title.Form("Vdep vs Time,%s%i.png", "TIB_L", detid);
+    name.Form("VdepEvol_VdepvsTime_%s%i.png", "TIB_L", detid);
+    timegr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage [ V ]");
+    timegr->GetHistogram()->GetXaxis()->SetTitle("Time since end of Run3 [days]");
+    timegr->GetHistogram()->SetAxisRange(-1000,1000);
+    // timegr->SetTitle(title);
+    timegr->SetName(name);
+    timegr->SetLineColor(1);
+    timegr->Draw("alp");
+   
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    timegr->SetName(Form("timegr_%i", detid));
+
+    timegr->Write();
+
+    title.Form("Vdep vs Layer,%s%i.png", "TIB_L", detid);
+    name.Form("VdepEvol_VdepvsLayer_%s%i.png", "TIB_L", detid);
+    Vdep_0v1->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage [ V ]");
+    Vdep_0v1->GetHistogram()->GetXaxis()->SetTitle("Time since end of Run3 [days]");
+    Vdep_0v1->SetTitle(title);
+    Vdep_0v1->SetName(name);
+    Vdep_0v1->SetLineColor(1);
+    Vdep_0v1->Draw("alp");
+    cgr->SaveAs(name);
+    Vdep_0v1->SetName(Form("timegr_%i", detid));
+    Vdep_0v1->Write();
+		}
+
+	if (detid>4 && detid <=10)
+    		{
+			
+			detid = detid-4;
+                    TCanvas * c2 = new TCanvas();
+        c2->cd();
+	//setTDRStyle();
+	//writeExtraText = true;       // if extra text
+  	//extraText  = "CMS";  // default extra text is "Preliminary"
+        title.Form("Module temperature (%s, DETID: %i)", "TOB_L" , detid);
+        // h_T->SetTitle(title);
+        h_T->SetLineColor(kBlack);
+        h_T->GetXaxis()->SetTitle("Time (steps)");
+        h_T->GetYaxis()->SetTitle("Temperature (#circK)");
+        h_T->DrawCopy();
+        name.Form("VdepEvol_T_%s%i.png", "TOB_L", detid);
+                // TLatex *t = new TLatex(1,1000,"CMS");
+        //t->Draw();
+        c2->SaveAs(name);
+	    h_T->SetLabelOffset(0.007,"Y");
+        h_T->SetName(Form("T_%i", detid));
+        h_T->Write();
+        
+        
+        TCanvas * c3 = new TCanvas();
+        c3->cd();
+	//setTDRStyle();
+        title.Form("Corrected leakage current (%s, DETID: %i)", "TOB_L", detid);
+        // h_I_leak_corr->SetTitle(title);
+        h_I_leak_corr->SetLineColor(kBlack);
+        h_I_leak_corr->GetXaxis()->SetTimeDisplay(1);
+        h_I_leak_corr->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_I_leak_corr->GetXaxis()->SetTitle("Time");
+        h_I_leak_corr->GetYaxis()->SetTitle("Leakage current (mA)");
+        h_I_leak_corr->DrawCopy();
+        name.Form("VdepEvol_Ileak_%s%i.png", "TOB_L", detid);
+                
+        //t->Draw();
+        c3->SaveAs(name);
+        h_I_leak_corr->SetName(Form("Ileak_%i", detid));
+        h_I_leak_corr->Write();
+        
+        
+        TCanvas * c4 = new TCanvas();
+        c4->cd();
+			title.Form("Full depletion voltage (%s%i)", "TOB_L", detid); 
+
+
+
+        // h_U->SetTitle(title);
+        h_U->GetXaxis()->SetTimeDisplay(1);
+	//h_U->GetXaxis()->SetTimeFormat("#splitline{%Y}{%d/%m}");
+        h_U->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_U->SetLineColor(kBlack);
+        h_U->GetXaxis()->SetTitle("Time");
+        h_U->GetYaxis()->SetTitle("Full depletion voltage (V)");
+        h_U->GetYaxis()->SetRangeUser(0,350);
+        h_U->DrawCopy();
+        name.Form("VdepEvol_Vdep_%s%i.png", "TOB_L", detid);
+ 
+        //t->Draw();
+        c4->SaveAs(name);
+        h_U->SetName(Form("Vdep_%i", detid));
+        h_U->Write();
+                TCanvas * c5 = new TCanvas();
+        c5->cd();
+        title.Form("Effective space charge (%s, DETID: %i)", "TOB_L", detid);
+        // h_N->SetTitle(title);
+        //	h_N->GetXaxis()->SetTimeDisplay(1);
+        //	h_N->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_N->GetXaxis()->SetTitle("Time (steps)");
+        h_N->GetYaxis()->SetTitle("Effective space charge (cm-3)");
+        h_N->DrawCopy();
+        h_Nc->SetLineColor(kBlue);
+        h_Nc->DrawCopy("SAME");
+        h_Na->SetLineColor(kGreen);
+        h_Na->DrawCopy("SAME");
+        h_NY->SetLineColor(kRed);
+        h_NY->DrawCopy("SAME");
+        name.Form("VdepEvol_Ncontrib_%s%i.png", "TOB_L", detid);
+
+        //t->Draw();
+        c5->SaveAs(name);
+        h_N->SetName(Form("N_%i", detid));
+        h_N->Write();
+        h_Nc->SetName(Form("Nc_%i", detid));
+        h_Nc->Write();
+        h_Na->SetName(Form("Na_%i", detid));
+        h_Na->Write();
+        h_NY->SetName(Form("NY_%i", detid));
+        h_NY->Write();
+        
+        
+        c5->cd();
+        title.Form("Effective space charge contributions (%s, DETID: %i)", "TOB_L", detid);
+        // h_N->SetTitle(title);
         //	h_N-dGetXaxis()->SetTimeDisplay(1);
         //	h_N->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
         h_N->GetXaxis()->SetTitle("Time (steps)");
         h_N->GetYaxis()->SetTitle("Effective space charge (cm-3)");
         h_N->DrawCopy();
-        name.Form("VdepEvol_Neff_%s_%i.png", pg, detid);
+        name.Form("VdepEvol_Neff_%s%i.png", "TOB_L", detid);
+
+        //t->Draw();
         c5->SaveAs(name);
-    }
-    
-    
-    TCanvas * cgr = new TCanvas();
+
+            TCanvas * cgr = new TCanvas();
     cgr->cd();
-    title.Form("Vdep vs Lumi, DETID: %i", detid);
-    name.Form("VdepEvol_VdepvsLumi_%i.png", detid);
+    //setTDRStyle();
+    
+
+    title.Form("Vdep vs Lumi,%s%i", "TOB_L", detid);
+    
+    name.Form("VdepEvol_VdepvsLumi_%s%i.png", "TOB_L", detid);
     lumigr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
     lumigr->GetHistogram()->GetXaxis()->SetTitle("Int. luminosity (fb^{-1})");
-    lumigr->SetTitle(title);
+    lumigr->GetHistogram()->GetYaxis()->SetRangeUser(0,350);
+    lumigr->GetHistogram()->GetXaxis()->SetRangeUser(0,600);
+    // lumigr->SetTitle(title);
     lumigr->SetName(name);
     lumigr->SetLineColor(1);
     lumigr->Draw("alp");
+
+        //t->Draw();
     if(print_plots) cgr->SaveAs(name);
-    lumigr->SetName(Form("lumigr_%i", detid));
+    //lumigr->SetName(Form("lumigr_%i", detid));
+    lumigr->SetName(Form("lumigr_%s%i", "TOB_L", detid));
+    lumigr->SaveAs(Form("lumigr_%s%i.root", "TOB_L", detid));
     lumigr->Write();
     
-    title.Form("Vdep vs Fluence, DETID: %i", detid);
-    name.Form("VdepEvol_VdepvsFeq_%i.png", detid);
+    title.Form("Vdep vs Fluence, DETID: %s%i", "TOB_L", detid);
+    name.Form("VdepEvol_VdepvsFeq_%s%i.png", "TOB_L", detid);
     feqgr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
     feqgr->GetHistogram()->GetXaxis()->SetTitle("Fluence (1MeV neq/cm^{-2})");
-    feqgr->SetTitle(title);
+    // feqgr->SetTitle(title);
     feqgr->SetName(name);
     feqgr->SetLineColor(1);
     feqgr->Draw("alp");
+        
+        //t->Draw();
     if(print_plots) cgr->SaveAs(name);
     feqgr->SetName(Form("feqgr_%i", detid));
     feqgr->Write();
     
+    title.Form("Vdep vs Time, %s%i", "TOB_L", detid);
+    name.Form("VdepEvol_VdepvsTime_%s%i.png", "TOB_L", detid);
+    timegr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
+    timegr->GetHistogram()->GetXaxis()->SetTitle("Time since end of Run3(days)");
+    timegr->GetHistogram()->SetAxisRange(-1000,1000);
+    // timegr->SetTitle(title);
+    timegr->SetName(name);
+    timegr->SetLineColor(1);
+    timegr->Draw("alp");
+     //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    timegr->SetName(Form("timegr_%i", detid));
+
+    timegr->Write();
+		}
+
+    
+
+
+
+	if (detid>10 && detid <=13)
+    		{
+			detid = detid-10;
+
+            TCanvas * c2 = new TCanvas();
+        c2->cd();
+	//setTDRStyle();
+	//writeExtraText = true;       // if extra text
+  	//extraText  = "CMS";  // default extra text is "Preliminary"
+        title.Form("Module temperature (%s, DETID: %i)", "TID_R" , detid);
+        // h_T->SetTitle(title);
+        h_T->SetLineColor(kBlack);
+        h_T->GetXaxis()->SetTitle("Time (steps)");
+        h_T->GetYaxis()->SetTitle("Temperature (#circK)");
+        h_T->DrawCopy();
+        name.Form("VdepEvol_T_%s%i.png", "TID_R", detid);
+                // TLatex *t = new TLatex(1,1000,"CMS");
+        //t->Draw();
+        c2->SaveAs(name);
+	h_T->SetLabelOffset(0.007,"Y");
+        h_T->SetName(Form("T_%i", detid));
+        h_T->Write();
+        
+        
+        TCanvas * c3 = new TCanvas();
+        c3->cd();
+	//setTDRStyle();
+        title.Form("Corrected leakage current (%s, DETID: %i)", "TID_R", detid);
+        // h_I_leak_corr->SetTitle(title);
+        h_I_leak_corr->SetLineColor(kBlack);
+        h_I_leak_corr->GetXaxis()->SetTimeDisplay(1);
+        h_I_leak_corr->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_I_leak_corr->GetXaxis()->SetTitle("Time");
+        h_I_leak_corr->GetYaxis()->SetTitle("Leakage current (mA)");
+        h_I_leak_corr->DrawCopy();
+        name.Form("VdepEvol_Ileak_%s%i.png", "TOB_L", detid);
+ 
+        //t->Draw();
+        c3->SaveAs(name);
+        h_I_leak_corr->SetName(Form("Ileak_%i", detid));
+        h_I_leak_corr->Write();
+
+                TCanvas * c4 = new TCanvas();
+        c4->cd();
+			title.Form("Full depletion voltage (%s%i)", "TID_R", detid);	
+
+
+
+
+        // h_U->SetTitle(title);
+        h_U->GetXaxis()->SetTimeDisplay(1);
+	//h_U->GetXaxis()->SetTimeFormat("#splitline{%Y}{%d/%m}");
+        h_U->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_U->SetLineColor(kBlack);
+        h_U->GetXaxis()->SetTitle("Time");
+        h_U->GetYaxis()->SetTitle("Full depletion voltage (V)");
+        h_U->DrawCopy();
+        name.Form("VdepEvol_Vdep_%s%i.png", "TID_R", detid);
+
+        //t->Draw();
+        c4->SaveAs(name);
+        h_U->SetName(Form("Vdep_%i", detid));
+        h_U->Write();
+                TCanvas * c5 = new TCanvas();
+        c5->cd();
+        title.Form("Effective space charge (%s, DETID: %i)", "TID_R", detid);
+        // h_N->SetTitle(title);
+        //	h_N->GetXaxis()->SetTimeDisplay(1);
+        //	h_N->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_N->GetXaxis()->SetTitle("Time (steps)");
+        h_N->GetYaxis()->SetTitle("Effective space charge (cm-3)");
+        h_N->DrawCopy();
+        h_Nc->SetLineColor(kBlue);
+        h_Nc->DrawCopy("SAME");
+        h_Na->SetLineColor(kGreen);
+        h_Na->DrawCopy("SAME");
+        h_NY->SetLineColor(kRed);
+        h_NY->DrawCopy("SAME");
+        name.Form("VdepEvol_Ncontrib_%s%i.png", "TID_R", detid);
+               
+        //t->Draw();
+        c5->SaveAs(name);
+        h_N->SetName(Form("N_%i", detid));
+        h_N->Write();
+        h_Nc->SetName(Form("Nc_%i", detid));
+        h_Nc->Write();
+        h_Na->SetName(Form("Na_%i", detid));
+        h_Na->Write();
+        h_NY->SetName(Form("NY_%i", detid));
+        h_NY->Write();
+        
+        
+        c5->cd();
+        title.Form("Effective space charge contributions (%s, DETID: %i)", "TID_R", detid);
+        // h_N->SetTitle(title);
+        //	h_N-dGetXaxis()->SetTimeDisplay(1);
+        //	h_N->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_N->GetXaxis()->SetTitle("Time (steps)");
+        h_N->GetYaxis()->SetTitle("Effective space charge (cm-3)");
+        h_N->DrawCopy();
+        name.Form("VdepEvol_Neff_%s%i.png", "TID_R", detid);
+
+        //t->Draw();
+        c5->SaveAs(name);
+
+            TCanvas * cgr = new TCanvas();
+    cgr->cd();
+    //setTDRStyle();
+    
+
+    title.Form("Vdep vs Lumi, %s%i", "TID_R", detid);
+    name.Form("VdepEvol_VdepvsLumi_%s%i.png", "TID_R", detid);
+    lumigr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
+    lumigr->GetHistogram()->GetXaxis()->SetTitle("Int. luminosity (fb^{-1})");
+    lumigr->GetHistogram()->GetXaxis()->SetRangeUser(0,600);
+    // lumigr->SetTitle(title);
+    lumigr->SetName(name);
+    lumigr->SetLineColor(1);
+    lumigr->Draw("alp");
+
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    lumigr->SetName(Form("lumigr_%i", detid));
+    lumigr->SaveAs(Form("lumigr_%s%i.root", "TID_R", detid));
+    lumigr->Write();
+    
+    title.Form("Vdep vs Fluence, %s%i", "TID_R", detid);
+    name.Form("VdepEvol_VdepvsFeq_%s%i.png", "TID_R", detid);
+    feqgr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
+    feqgr->GetHistogram()->GetXaxis()->SetTitle("Fluence (1MeV neq/cm^{-2})");
+    // feqgr->SetTitle(title);
+    feqgr->SetName(name);
+    feqgr->SetLineColor(1);
+    feqgr->Draw("alp");
+
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    feqgr->SetName(Form("feqgr_%i", detid));
+    feqgr->Write();
+    
+    title.Form("Vdep vs Time, DETID: %s%i", "TID_R", detid);
+    name.Form("VdepEvol_VdepvsTime_%s%i.png", "TID_R", detid);
+    timegr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
+    timegr->GetHistogram()->GetXaxis()->SetTitle("Time since end of Run3(days)");
+    timegr->GetHistogram()->SetAxisRange(-1000,1000);
+    // timegr->SetTitle(title);
+    timegr->SetName(name);
+    timegr->SetLineColor(1);
+    timegr->Draw("alp");
+
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    timegr->SetName(Form("timegr_%i", detid));
+
+    timegr->Write();
+		}
+
+	if (detid>13 && detid <=20)
+    		{
+			
+			detid = detid-13;
+
+            TCanvas * c2 = new TCanvas();
+        c2->cd();
+	//setTDRStyle();
+	//writeExtraText = true;       // if extra text
+  	//extraText  = "CMS";  // default extra text is "Preliminary"
+        title.Form("Module temperature (%s, DETID: %i)", "TEC_R" , detid);
+        // h_T->SetTitle(title);
+        h_T->SetLineColor(kBlack);
+        h_T->GetXaxis()->SetTitle("Time (steps)");
+        h_T->GetYaxis()->SetTitle("Temperature (#circK)");
+        h_T->DrawCopy();
+        name.Form("VdepEvol_T_%s%i.png","TEC_R", detid);
+                        // TLatex *t = new TLatex(1,1000,"CMS");
+        //t->Draw();
+        c2->SaveAs(name);
+
+	h_T->SetLabelOffset(0.007,"Y");
+        h_T->SetName(Form("T_%i", detid));
+        h_T->Write();
+        
+        
+        TCanvas * c3 = new TCanvas();
+        c3->cd();
+	//setTDRStyle();
+        title.Form("Corrected leakage current (%s, DETID: %i)", "TEC_R", detid);
+        // h_I_leak_corr->SetTitle(title);
+        h_I_leak_corr->GetXaxis()->SetTimeDisplay(1);
+        h_I_leak_corr->SetLineColor(kBlack);
+        h_I_leak_corr->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_I_leak_corr->GetXaxis()->SetTitle("Time");
+        h_I_leak_corr->GetYaxis()->SetTitle("Leakage current (mA)");
+        h_I_leak_corr->DrawCopy();
+        name.Form("VdepEvol_Ileak_%s%i.png", "TEC_R", detid);
+                //t->Draw();
+        c3->SaveAs(name);
+
+
+        h_I_leak_corr->SetName(Form("Ileak_%i", detid));
+        h_I_leak_corr->Write();
+
+            TCanvas * c4 = new TCanvas();
+        c4->cd();
+			title.Form("Full depletion voltage (%s%i)", "TEC_R", detid);	
+
+        // h_U->SetTitle(title);
+        h_U->GetXaxis()->SetTimeDisplay(1);
+	//h_U->GetXaxis()->SetTimeFormat("#splitline{%Y}{%d/%m}");
+        h_U->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_U->SetLineColor(kBlack);
+        h_U->GetXaxis()->SetTitle("Time");
+        h_U->GetYaxis()->SetTitle("Full depletion voltage (V)");
+        h_U->DrawCopy();
+        name.Form("VdepEvol_Vdep_%s%i.png", "TEC_R", detid);
+                //t->Draw();
+        c4->SaveAs(name);
+
+
+        h_U->SetName(Form("Vdep_%i", detid));
+        h_U->Write();
+
+                TCanvas * c5 = new TCanvas();
+        c5->cd();
+        title.Form("Effective space charge (%s, DETID: %i)","TEC_R", detid);
+        // h_N->SetTitle(title);
+        //	h_N->GetXaxis()->SetTimeDisplay(1);
+        //	h_N->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_N->GetXaxis()->SetTitle("Time (steps)");
+        h_N->GetYaxis()->SetTitle("Effective space charge (cm-3)");
+        h_N->DrawCopy();
+        h_Nc->SetLineColor(kBlue);
+        h_Nc->DrawCopy("SAME");
+        h_Na->SetLineColor(kGreen);
+        h_Na->DrawCopy("SAME");
+        h_NY->SetLineColor(kRed);
+        h_NY->DrawCopy("SAME");
+        name.Form("VdepEvol_Ncontrib_%s%i.png", "TEC_R", detid);
+
+        //t->Draw();
+        c5->SaveAs(name);
+        h_N->SetName(Form("N_%i", detid));
+        h_N->Write();
+        h_Nc->SetName(Form("Nc_%i", detid));
+        h_Nc->Write();
+        h_Na->SetName(Form("Na_%i", detid));
+        h_Na->Write();
+        h_NY->SetName(Form("NY_%i", detid));
+        h_NY->Write();
+        
+        
+        c5->cd();
+        title.Form("Effective space charge contributions (%s, DETID: %i)", "TEC_R", detid);
+        // h_N->SetTitle(title);
+        //	h_N-dGetXaxis()->SetTimeDisplay(1);
+        //	h_N->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_N->GetXaxis()->SetTitle("Time (steps)");
+        h_N->GetYaxis()->SetTitle("Effective space charge (cm-3)");
+        h_N->DrawCopy();
+        name.Form("VdepEvol_Neff_%s%i.png", "TEC_R", detid);
+
+        //t->Draw();
+        c5->SaveAs(name);
+
+
+            TCanvas * cgr = new TCanvas();
+    cgr->cd();
+    //setTDRStyle();
+    
+
+    title.Form("Vdep vs Lumi,%s%i", "TEC_R", detid);
+    name.Form("VdepEvol_VdepvsLumi_%s%i.png", "TEC_R", detid);
+    lumigr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
+    lumigr->GetHistogram()->GetXaxis()->SetTitle("Int. luminosity (fb^{-1})");
+    lumigr->GetHistogram()->GetXaxis()->SetRangeUser(0,600);
+    // lumigr->SetTitle(title);
+    lumigr->SetName(name);
+    lumigr->SetLineColor(1);
+    lumigr->Draw("alp");
+
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    lumigr->SetName(Form("lumigr_%i", detid));
+    lumigr->SaveAs(Form("lumigr_%s%i.root", "TEC_R", detid));
+    lumigr->Write();
+    
+    title.Form("Vdep vs Fluence,%s%i", "TEC_R", detid);
+    name.Form("VdepEvol_VdepvsFeq_%i.png", detid);
+    feqgr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
+    feqgr->GetHistogram()->GetXaxis()->SetTitle("Fluence (1MeV neq/cm^{-2})");
+    // feqgr->SetTitle(title);
+    feqgr->SetName(name);
+    feqgr->SetLineColor(1);
+    feqgr->Draw("alp");
+
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    feqgr->SetName(Form("feqgr_%i", detid));
+    feqgr->Write();
+    
+    title.Form("Vdep vs Time, %s%i", "TEC_R", detid);
+    name.Form("VdepEvol_VdepvsTime_%s%i.png", "TEC_R", detid);
+    timegr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
+    timegr->GetHistogram()->GetXaxis()->SetTitle("Time since end of Run3(days)");
+    timegr->GetHistogram()->SetAxisRange(-1000,1000);
+    // timegr->SetTitle(title);
+    timegr->SetName(name);
+    timegr->SetLineColor(1);
+    timegr->Draw("alp");
+
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    timegr->SetName(Form("timegr_%i", detid));
+
+    timegr->Write();
+		}
+	
+
+    }
+    
+    
+    ofs.close();
+    //StoreVinit.close();
     h_T->Delete();
     h_I_leak->Delete();
     h_I_leak_corr->Delete();
@@ -539,7 +1126,7 @@ void HamburgModelFactory::drawLumiTempScenario(){
     TH1D * h_IntLumi = new TH1D("h_IntLumi","Integrated luminosity in fb^{-1}",maxTime,0.5,periodInDays*24.*60.*60.*maxTime+0.5);
     TH1D * h_T_base = new TH1D("h_T_base","Temperature set points", maxTime, 0.5, periodInDays*24*60*60*maxTime+0.5);
     
-    
+    	
     for(Int_t i = 0; i<Nperiods; i++){
         h_Feq->SetBinContent(i+1, Feq[i]);
         h_Feq_total->SetBinContent(i+1, intFeq[i]);
@@ -550,7 +1137,10 @@ void HamburgModelFactory::drawLumiTempScenario(){
     
     TString title;
     TCanvas * cF = new TCanvas();
+    // gROOT->LoadMacro("tdrstyle.C");
+    
     cF->cd();
+    //setTDRStyle();
     //	  title.Form("Fluence vs time");
     //	  h_Feq_total->SetTitle(title);
     h_Feq_total->SetName("intFeq");
@@ -564,29 +1154,33 @@ void HamburgModelFactory::drawLumiTempScenario(){
     
     TCanvas * cL = new TCanvas();
     cL->cd();
+    // setTDRStyle();
     //	  title.Form("Fluence vs time");
     //	  h_Feq_total->SetTitle(title);
     h_IntLumi->SetName("intLumi");
     h_IntLumi->GetXaxis()->SetTimeDisplay(1);
     h_IntLumi->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
     h_IntLumi->GetXaxis()->SetTitle("Time");
-    h_IntLumi->GetYaxis()->SetTitle("Int. luminosity (fb^{-1})");
+    h_IntLumi->GetYaxis()->SetTitle("Integrated luminosity [ fb^{-1} ]");
     h_IntLumi->GetYaxis()->SetTitleOffset(1.2);
     h_IntLumi->DrawCopy();
+    h_IntLumi->SaveAs("VdepEvol_IntLumi.root");
     cL->SaveAs("VdepEvol_IntLumi.png");
     h_IntLumi->Write();
     
     
     TCanvas * cT = new TCanvas();
     cT->cd();
+    // setTDRStyle();
     title.Form("Temperature set points without corrections");
     h_T_base->SetTitle(title);
     h_T_base->SetName("Temp");
     h_T_base->GetXaxis()->SetTimeDisplay(1);
     h_T_base->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
     h_T_base->GetXaxis()->SetTitle("Time");
-    h_T_base->GetYaxis()->SetTitle("Temperature (#circC)");
+    h_T_base->GetYaxis()->SetTitle("Temperature [ #circC ]");
     h_T_base->DrawCopy();
+    h_T_base->SaveAs("VdepEvol_T_base.root");
     cT->SaveAs("VdepEvol_T_base.png");
     h_T_base->Write();
 
@@ -633,6 +1227,7 @@ void HamburgModelFactory::runSimuForAllModules(int option=1, bool saveTree=false
     
     std::cout << "Starting module life simulation" << std::endl;
     std::cout << "Option " << option << std::endl;
+    // float VDEPF[40]={0};
     //for (int idet = 0; idet< 1; idet++) {
     for (int idet = 0; idet< nentries; idet++) {
 
@@ -660,7 +1255,7 @@ void HamburgModelFactory::runSimuForAllModules(int option=1, bool saveTree=false
         std::cout << " doing calculations for detid " << detid << std::endl;
         std::cout << "   fluence: " <<fluence_7000TeV<< " Ton: "<<temp<<" ini_leak: "<<ini_leak<<" ini_vdep: "<<ini_vdep<< std::endl;
         
-        simulateSensorEvolution(detid);
+        simulateSensorEvolution(detid);//VDEPF[idet] = 
         if(detid==369120278 || detid==369120378 || detid == 369121381 || detid == 369121385  || detid == 369125870) drawSaveSensorSimu(true);
         else drawSaveSensorSimu(false);
         
@@ -674,10 +1269,10 @@ void HamburgModelFactory::runSimuForAllModules(int option=1, bool saveTree=false
 // for getting one representative curve per layer
 //------------------------------------------------
 
-void HamburgModelFactory::runSimuForAvgModules(bool drawNeff=false){
+void HamburgModelFactory::runSimuForAvgModules(bool drawNeff=false){//float[40] 
     
     std::cout << nentries <<" entries" << std::endl;
-    
+    // float VDEPF[40]={0};
     // pseudo detids from 1 to 10 for barrel layers
     for (int idet = 0; idet< nentries; idet++) {
         
@@ -685,10 +1280,36 @@ void HamburgModelFactory::runSimuForAvgModules(bool drawNeff=false){
         std::cout << " doing calculations for detid " << detid << std::endl;
         std::cout << "   fluence: " <<fluence_7000TeV<< " Ton: "<<temp<<" ini_leak: "<<ini_leak<<" ini_vdep: "<<ini_vdep<< std::endl;
 
-        simulateSensorEvolution(detid);
+        simulateSensorEvolution(detid);//VDEPF[idet] = 
         drawSaveSensorSimu(drawNeff);
         
     }
+    // return VDEPF;
 }
+
+
+//Plot demanded by the SND experiment => Final Vdep value vs Time
+// void HamburgModelFactory::drawVdepFinalvsTime(int layer, float[10][40] vdep_detid)
+//     {
+
+//         TH2D * h_Vdepf = new TH2D("h_Vdepf","Final Vdep vs Time",1000,0,1000,800,0,800);    
+//         for(Int_t i = 0; i<10; i++)
+//             {
+//                 h_Vdepf->SetBinContent(100*(i+1), vdep_detid[i][layer]);
+//             }
+    
+//         TCanvas * cF = new TCanvas();
+//         cF->cd();
+//     //	  title.Form("Fluence vs time");
+//     //	  h_Feq_total->SetTitle(title);
+//         h_Vdepf->SetName("intFeq");
+//         h_Vdepf->GetXaxis()->SetTimeDisplay(1);
+//         h_Vdepf->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+//         h_Vdepf->GetXaxis()->SetTitle("Time (days)");
+//         h_Vdepf->GetYaxis()->SetTitle("Vdep (V)");
+//         h_Vdepf->DrawCopy();
+//         cF->SaveAs("VdepFinal_Time.png");
+//         h_Vdepf->Write();
+//     }
 
 

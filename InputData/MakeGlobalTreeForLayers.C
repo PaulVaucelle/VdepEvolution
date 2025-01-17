@@ -192,7 +192,7 @@ void MakeGlobalTreeForLayers()
 
     Int_t nentries;
 
-    fin = new TFile("GlobalTree_stdinterpol_flu35-70.root");
+    fin = new TFile("../Predictions/Inputs/GlobalTree.root");//_stdinterpol_flu35-70
     tree = (TTree*) fin->Get("globaltree");
 
     tree->SetBranchAddress("Partition",&partition);
@@ -229,7 +229,7 @@ void MakeGlobalTreeForLayers()
     // Declaration of the output tree
     //--------------------------------
     
-    TFile *fout = new TFile("GlobalTree_perlayer.root" ,"recreate");
+    TFile *fout = new TFile("GlobalTree_perlayer_test.root" ,"recreate");
     TTree *globaltree = new TTree("globaltree", "");
     
     Int_t detid_o,structpos_o;
@@ -389,7 +389,7 @@ void MakeGlobalTreeForLayers()
 
         
         // Set quantile values
-        float p = 0.5;
+        float p = 0.5;//0.1 - 0.5 0.9
         
         structpos_o = layer_l;
         detid_o = ilay;
