@@ -127,6 +127,7 @@ gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
     TH1D * hVdep = new TH1D("","",nbin,0,nbin-1);
     hVdep = (TH1D*)f1->Get("intLumi");
     hVdep->GetXaxis()->SetTimeDisplay(1);
+
     hVdep->GetXaxis()->SetTimeFormat("%m/%y%F2010-01-01 00:00:00");
 
     hVdep->SetTitle("");
@@ -150,16 +151,17 @@ gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
   // leg->AddEntry(hVdep,"Init. V_{fd}","P");
 
 
-  leg->Draw();
+  // leg->Draw();
 //########
 
-           TLine *line = new TLine(420000000,0,420000000,480);
+           TLine *line = new TLine(475000000,0,475000000,570);
       line->SetLineWidth(6);
    line->SetLineStyle(2);
    line->SetLineColor(kRed);
    line->Draw();
 
-        TLatex *t = new TLatex(-0.15,490,"CMS");
+
+        TLatex *t = new TLatex(-0.15,580,"CMS");
         t->SetTextFont(61);
         t->SetTextAlign(11);
         float fac = pad2->GetTopMargin();
@@ -177,10 +179,10 @@ gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
         t2->SetTextAngle(90);
         t2->SetTextSize(0.4*fac);
         t2->SetTextColor(kRed);
-        t2->DrawLatex(435000000,350,"Predictions");
+        t2->DrawLatex(500000000,350,"Predictions");
   //########
 
-                TLatex *t3 = new TLatex(57500000,490,"Preliminary");
+                TLatex *t3 = new TLatex(57500000,580,"Preliminary");
         t3->SetTextFont(52);
         t3->SetTextAlign(11);
         t3->SetTextSize(0.5*fac);
@@ -188,7 +190,7 @@ gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
 
   //########
 
-                TLatex *t5 = new TLatex(-20000000,-30.5,"01/10   01/12   01/14   01/16   01/18   01/20   01/22   01/24   01/26");
+                TLatex *t5 = new TLatex(-20000000,-26.5,"01/10  01/12   01/14   01/16   01/18   01/20   01/22  01/24  01/26");
         t5->SetTextFont(42);
         t5->SetTextAlign(1);
         t5->SetTextSize(0.6*fac);

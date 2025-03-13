@@ -179,11 +179,13 @@ gStyle->SetOptStat(stati);
 //   leg->Draw();
 //########
 
-           TLine *line = new TLine(420000000,0,420000000,350);
+
+           TLine *line = new TLine(475000000,0,475000000,350);
       line->SetLineWidth(6);
    line->SetLineStyle(2);
    line->SetLineColor(kRed);
    line->Draw();
+
 
         TLatex *t = new TLatex(-0.15,355,"CMS");
         t->SetTextFont(61);
@@ -196,7 +198,7 @@ gStyle->SetOptStat(stati);
         t2->SetTextFont(52);
         t2->SetTextAlign(11);
         t2->SetTextSize(0.5*fac);
-        t2->DrawLatex(25000000,310,"Expected Run 3 L_{int} = 260 fb^{-1}");
+        t2->DrawLatex(25000000,310,"Expected L_{int}^{2025+2026} = 150 fb^{-1}");
 
 
         TLatex *t6 = new TLatex();
@@ -205,7 +207,7 @@ gStyle->SetOptStat(stati);
         t6->SetTextAngle(90);
         t6->SetTextSize(0.4*fac);
         t6->SetTextColor(kRed);
-        t6->DrawLatex(435000000,250,"Predictions");
+        t6->DrawLatex(500000000,150,"Predictions");
         // TBox* Box = new TBox(0.5,0.58,0.7,0.7);
         // Box->SetFillColorAlpha(0,0);
         // Box->SetLineColor(ROOT.kRed);
@@ -219,14 +221,14 @@ gStyle->SetOptStat(stati);
         t3->Draw();
   //########
 
-                TLatex *t4 = new TLatex(314500000,357,"Tracker Inner Barrel Layer 1");
+                TLatex *t4 = new TLatex(334500000,357,"Tracker Inner Barrel Layer 1");
         t4->SetTextFont(42);
         t4->SetTextAlign(11);
         t4->SetTextSize(0.5*fac);
         t4->Draw();
   //########
 
-                TLatex *t5 = new TLatex(-20000000,-23,"01/10   01/12   01/14   01/16   01/18   01/20   01/22   01/24   01/26");
+                TLatex *t5 = new TLatex(-20000000,-23,"01/10  01/12  01/14   01/16  01/18   01/20   01/22  01/24   01/26");
         t5->SetTextFont(42);
         t5->SetTextAlign(1);
         t5->SetTextSize(0.6*fac);

@@ -13,6 +13,7 @@
 
 //void ComputeVdepEvolution_v2(){
 int main(){
+    gROOT->SetBatch(true);
     std::string fb = "300";// 300 - 400 - 500
     std::string d = "500";// 100 - 300 - 500
     HamburgModelFactory factory;
@@ -23,7 +24,7 @@ int main(){
     // factory.readLumiTempScenario("Inputs/realistic_scenario_"+fb+"fb_"+d+"d.txt");
     factory.readLumiTempScenario("Inputs/realistic_scenario_150fb_2025_2026.txt");
     //factory.runSimuForAllModules(1);//test modules
-    factory.runSimuForAllModules(2, true); // small scans modules
-
+    factory.runSimuForAllModules(5, true); //2 :  small scans modules
+    // 5 : Martin request TEC R5 W9
     factory.drawLumiTempScenario();    
 }

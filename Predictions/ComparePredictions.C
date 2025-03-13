@@ -3,12 +3,16 @@
 #include <TCanvas.h>
 #include <TLegend.h>
 
-void plot() {
-    TString file1 = "Oldlumigr_TIB_L1.root";
-    TString file2 = "lumigr_TIB_L1.root";
+void plot(TString LAYER, TString Ring) {
+    TString layer = LAYER;
+    TString file1 = "Oldlumigr_"+layer+".root";
+    TString file2 = "lumigr_"+layer+".root";
    
-    TString graph1_name = "lumigr_TIB_L1";
-    TString graph2_name = "lumigr_TIB_L1";
+    // TString graph1_name = "lumigr_"+layer;
+    // TString graph2_name = "lumigr_"+layer;
+       
+    TString graph1_name = "lumigr_"+Ring;
+    TString graph2_name = "lumigr_"+Ring;
     // Ouvrir les fichiers ROOT
     TFile* f1 = TFile::Open(file1);
     TFile* f2 = TFile::Open(file2);
@@ -33,32 +37,40 @@ void plot() {
     TCanvas* canvas = new TCanvas("canvas", "Overlay of Two TGraphs", 800, 600);
 
     // Configurer les styles pour les graphiques
-    graph1->SetLineColor(kRed);
-    graph1->SetLineWidth(2);
-    graph1->SetMarkerColor(kRed);
-    graph1->SetMarkerStyle(20);
-    graph1->SetMarkerStyle(1);
-    graph1->SetMarkerSize(1);
-
-    graph2->SetLineColor(kBlue);
+    graph2->SetTitle("");
+        graph2->SetLineColor(kBlue);
     graph2->SetLineWidth(2);
     graph2->SetMarkerColor(kBlue);
     graph2->SetMarkerStyle(1);
     graph2->SetMarkerSize(1);
 
+    graph1->SetLineColor(kRed);
+    graph1->SetLineWidth(2);
+    graph1->SetMarkerColor(kRed);
+    // graph1->SetMarkerStyle(20);
+    graph1->SetMarkerStyle(1);
+    graph1->SetMarkerSize(1);
+
+
+
     // Dessiner les graphiques sur le même canvas
-    graph1->Draw("ALP");  // Axe, ligne, points
-    graph2->Draw("LP SAME");
+    graph2->Draw("ALP");
+    graph1->Draw("LP SAME");  // Axe, ligne, points
+
+    graph2->GetXaxis()->SetRangeUser(0,600);
+    graph2->GetYaxis()->SetRangeUser(0,350);
+    // graph1->GetXaxis()->SetRangeUser(0,600);
+    // graph1->GetYaxis()->SetRangeUser(0,350);
 
     // Ajouter une légende
     TLegend* legend = new TLegend(0.5, 0.7, 0.7, 0.9);
-    legend->AddEntry(graph1, "Old TIBL1", "lp");
-    legend->AddEntry(graph2, "New TIBL1", "lp");
+    legend->AddEntry(graph1, "Old "+layer, "lp");
+    legend->AddEntry(graph2, "New "+layer, "lp");
     legend->Draw();
 
     // Afficher le canvas
     canvas->Update();
-    canvas->SaveAs("ComaprePredi.png");
+    canvas->SaveAs("ComaprePredi"+layer+".pdf");
 
     // Fermeture des fichiers ROOT
     f1->Close();

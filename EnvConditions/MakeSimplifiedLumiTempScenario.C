@@ -1674,9 +1674,11 @@ void MakeRun3Scenario(int scenario=0, int femto=0){
 // scenario 1 : dismanteling of 100 days
 // scenario 2 : dismanteling of 300 days 
 // scenario 3 : dismanteling of 500 days 
-// The expected scenario atm(April 2023) is 300 fb-1, femto gives the option of adding lumi that will be separeted in half between 2024 and 2025==> (300+femto)
+// The expected scenario atm(January 2025) 120 fb-1 for 2025 and 30 for 2026 
+// scenario is the number of days of dismantling at room temperature you want (scenario >0 are not up to date) and femto is not useful in this version of the code
+// but can be used to give an expected luminosity 
 //-----------------------------------------------//
-// function good when doing thepredictions in March 2023 ...
+// function good when doing thepredictions in January 2025 ...
 void MakeRun20252026Scenario(int scenario=0, int femto=0){
     
     bool debug=false;
@@ -1703,7 +1705,7 @@ void MakeRun20252026Scenario(int scenario=0, int femto=0){
     // temperature shift
     float T1=19.; //19 In Run 2
     float T2=24.; //24 In 2018
-    float T3=24.; //was29 but currently 24 In Run 3
+    float T3=29.; //was29 but currently 24 In Run 3
 
 
     //---------

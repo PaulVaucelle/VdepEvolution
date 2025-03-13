@@ -171,7 +171,17 @@ void HamburgModelFactory::simulateSensorEvolution(int detid_){
         position = ((detid_ >> tecringoffset_) & tecringmask_);
         (position < 4) ? (pitch = 120e-4) : (pitch = 163e-4);
     }
-    
+
+// #define tecringoffset_   5
+// #define subdetoffset_   25
+// #define layerstartbit_  14
+// #define tecringmask_   0x7
+// #define subdetmask_    0x7
+// #define layermask_     0x7
+
+
+//     ((detId>>25)&0x7) == 6 [Selecting the TEC] and ((detId>>14)&0xF) == 9
+// [Selecting the wheel] and ((detId >> 5) & 7) == 5 [selecting the ring]
     
     // Ileak
     Double_t alpha1, alpha2, alpha3, delIleak;
@@ -373,6 +383,8 @@ void HamburgModelFactory::drawSaveSensorSimu(bool print_plots=false){
 
     TGraph * Vdep_0v1 = new TGraph();
     std::ofstream ofs ("./deltavfd_"+std::to_string(detid)+".txt", std::ofstream::out);
+    
+    TGraph *DeltaVdep = new TGraph(maxTime);
     // std::ofstream StoreVinit ("./Vinit_"+std::to_string(detid)+".txt", std::ofstream::out);
     for(Int_t i = 0; i<Nperiods; i++){
         
@@ -388,6 +400,7 @@ void HamburgModelFactory::drawSaveSensorSimu(bool print_plots=false){
         if (debug && (i%100 == 0)) std::cout << "     U " << U[i] << std::endl;
         h_U->SetBinContent(i+1, U[i]);
         
+        DeltaVdep->SetPoint(i, intLumi[i], U[i]-U[0]);
         lumigr->SetPoint(i, intLumi[i], U[i]);
         feqgr->SetPoint(i, intFeq[i], U[i]);
         timegr->SetPoint(i, (i+1)*periodInDays-5736, U[i]);
@@ -572,6 +585,26 @@ void HamburgModelFactory::drawSaveSensorSimu(bool print_plots=false){
     lumigr->SaveAs(Form("lumigr_%s%i.root", "TIB_L", detid));
     lumigr->Write();
     
+
+    title.Form("DeltaVdep vs Lumi, %s%i", "TIB_L", detid);
+    name.Form("VdepEvol_DeltaVdepvsLumi_%s%i.root", "TIB_L", detid);
+
+    DeltaVdep->GetHistogram()->GetYaxis()->SetTitle("Delta Full depletion voltage [ V ]");
+    DeltaVdep->GetHistogram()->GetXaxis()->SetTitle("Integrated luminosity [ fb^{ -1} ]");
+    DeltaVdep->GetHistogram()->GetYaxis()->SetRangeUser(-350,250);
+    DeltaVdep->GetHistogram()->GetXaxis()->SetRangeUser(0,600);
+    // DeltaVdep->SetTitle(title);
+    DeltaVdep->SetName(name);
+    DeltaVdep->SetLineColor(1);
+    DeltaVdep->SetLineWidth(4);
+    DeltaVdep->Draw("alp");
+         
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    DeltaVdep->SetName(Form("DeltaVdep_%s%i", "TIB_L", detid));
+    DeltaVdep->SaveAs(Form("DeltaVdep_%s%i.root", "TIB_L", detid));
+    DeltaVdep->Write();
+
     title.Form("Vdep vs Fluence,%s%i", "TIB_L", detid);
     name.Form("VdepEvol_VdepvsFeq_%s%i.png", "TIB_L", detid);
     feqgr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage [ V ]");
@@ -745,6 +778,29 @@ void HamburgModelFactory::drawSaveSensorSimu(bool print_plots=false){
     lumigr->SaveAs(Form("lumigr_%s%i.root", "TOB_L", detid));
     lumigr->Write();
     
+        title.Form("DeltaVdep vs Lumi, %s%i", "TOB_L", detid);
+    name.Form("VdepEvol_DeltaVdepvsLumi_%s%i.root", "TOB_L", detid);
+
+    DeltaVdep->GetHistogram()->GetYaxis()->SetTitle("Delta Full depletion voltage [ V ]");
+    DeltaVdep->GetHistogram()->GetXaxis()->SetTitle("Integrated luminosity [ fb^{ -1} ]");
+    DeltaVdep->GetHistogram()->GetYaxis()->SetRangeUser(-350,250);
+    DeltaVdep->GetHistogram()->GetXaxis()->SetRangeUser(0,600);
+    // DeltaVdep->SetTitle(title);
+    DeltaVdep->SetName(name);
+    DeltaVdep->SetLineColor(1);
+    DeltaVdep->SetLineWidth(4);
+    DeltaVdep->Draw("alp");
+         
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    DeltaVdep->SetName(Form("DeltaVdep_%s%i", "TOB_L", detid));
+    DeltaVdep->SaveAs(Form("DeltaVdep_%s%i.root", "TOB_L", detid));
+    DeltaVdep->Write();
+
+
+
+
+
     title.Form("Vdep vs Fluence, DETID: %s%i", "TOB_L", detid);
     name.Form("VdepEvol_VdepvsFeq_%s%i.png", "TOB_L", detid);
     feqgr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
@@ -905,6 +961,25 @@ void HamburgModelFactory::drawSaveSensorSimu(bool print_plots=false){
     lumigr->SaveAs(Form("lumigr_%s%i.root", "TID_R", detid));
     lumigr->Write();
     
+            title.Form("DeltaVdep vs Lumi, %s%i", "TID_R", detid);
+    name.Form("VdepEvol_DeltaVdepvsLumi_%s%i.root", "TID_R", detid);
+
+    DeltaVdep->GetHistogram()->GetYaxis()->SetTitle("Delta Full depletion voltage [ V ]");
+    DeltaVdep->GetHistogram()->GetXaxis()->SetTitle("Integrated luminosity [ fb^{ -1} ]");
+    DeltaVdep->GetHistogram()->GetYaxis()->SetRangeUser(-350,250);
+    DeltaVdep->GetHistogram()->GetXaxis()->SetRangeUser(0,600);
+    // DeltaVdep->SetTitle(title);
+    DeltaVdep->SetName(name);
+    DeltaVdep->SetLineColor(1);
+    DeltaVdep->SetLineWidth(4);
+    DeltaVdep->Draw("alp");
+         
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    DeltaVdep->SetName(Form("DeltaVdep_%s%i", "TID_R", detid));
+    DeltaVdep->SaveAs(Form("DeltaVdep_%s%i.root", "TID_R", detid));
+    DeltaVdep->Write();
+
     title.Form("Vdep vs Fluence, %s%i", "TID_R", detid);
     name.Form("VdepEvol_VdepvsFeq_%s%i.png", "TID_R", detid);
     feqgr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
@@ -1065,6 +1140,25 @@ void HamburgModelFactory::drawSaveSensorSimu(bool print_plots=false){
     lumigr->SaveAs(Form("lumigr_%s%i.root", "TEC_R", detid));
     lumigr->Write();
     
+            title.Form("DeltaVdep vs Lumi, %s%i", "TEC_R", detid);
+    name.Form("VdepEvol_DeltaVdepvsLumi_%s%i.root", "TEC_R", detid);
+
+    DeltaVdep->GetHistogram()->GetYaxis()->SetTitle("Delta Full depletion voltage [ V ]");
+    DeltaVdep->GetHistogram()->GetXaxis()->SetTitle("Integrated luminosity [ fb^{ -1} ]");
+    DeltaVdep->GetHistogram()->GetYaxis()->SetRangeUser(-350,250);
+    DeltaVdep->GetHistogram()->GetXaxis()->SetRangeUser(0,600);
+    // DeltaVdep->SetTitle(title);
+    DeltaVdep->SetName(name);
+    DeltaVdep->SetLineColor(1);
+    DeltaVdep->SetLineWidth(4);
+    DeltaVdep->Draw("alp");
+         
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    DeltaVdep->SetName(Form("DeltaVdep_%s%i", "TEC_R", detid));
+    DeltaVdep->SaveAs(Form("DeltaVdep_%s%i.root", "TEC_R", detid));
+    DeltaVdep->Write();
+
     title.Form("Vdep vs Fluence,%s%i", "TEC_R", detid);
     name.Form("VdepEvol_VdepvsFeq_%i.png", detid);
     feqgr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
@@ -1081,6 +1175,185 @@ void HamburgModelFactory::drawSaveSensorSimu(bool print_plots=false){
     
     title.Form("Vdep vs Time, %s%i", "TEC_R", detid);
     name.Form("VdepEvol_VdepvsTime_%s%i.png", "TEC_R", detid);
+    timegr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
+    timegr->GetHistogram()->GetXaxis()->SetTitle("Time since end of Run3(days)");
+    timegr->GetHistogram()->SetAxisRange(-1000,1000);
+    // timegr->SetTitle(title);
+    timegr->SetName(name);
+    timegr->SetLineColor(1);
+    timegr->Draw("alp");
+
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    timegr->SetName(Form("timegr_%i", detid));
+
+    timegr->Write();
+		}
+
+
+
+	if (detid>470176166 && detid <=470444202)
+    		{
+			 
+			// detid = detid-13;
+
+            TCanvas * c2 = new TCanvas();
+        c2->cd();
+	//setTDRStyle();
+	//writeExtraText = true;       // if extra text
+  	//extraText  = "CMS";  // default extra text is "Preliminary"
+        title.Form("Module temperature (%s, DETID: %i)", "TEC_R" , detid);
+        // h_T->SetTitle(title);
+        h_T->SetLineColor(kBlack);
+        h_T->GetXaxis()->SetTitle("Time (steps)");
+        h_T->GetYaxis()->SetTitle("Temperature (#circK)");
+        h_T->DrawCopy();
+        name.Form("VdepEvol_T_%s%i.png","TEC_R5_W9_", detid);
+                        // TLatex *t = new TLatex(1,1000,"CMS");
+        //t->Draw();
+        c2->SaveAs(name);
+
+	h_T->SetLabelOffset(0.007,"Y");
+        h_T->SetName(Form("T_%i", detid));
+        h_T->Write();
+        
+        
+        TCanvas * c3 = new TCanvas();
+        c3->cd();
+	//setTDRStyle();
+        title.Form("Corrected leakage current (%s, DETID: %i)", "TEC_R5_W9_", detid);
+        // h_I_leak_corr->SetTitle(title);
+        h_I_leak_corr->GetXaxis()->SetTimeDisplay(1);
+        h_I_leak_corr->SetLineColor(kBlack);
+        h_I_leak_corr->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_I_leak_corr->GetXaxis()->SetTitle("Time");
+        h_I_leak_corr->GetYaxis()->SetTitle("Leakage current (mA)");
+        h_I_leak_corr->DrawCopy();
+        name.Form("VdepEvol_Ileak_%s%i.png", "TEC_R5_W9_", detid);
+                //t->Draw();
+        c3->SaveAs(name);
+
+
+        h_I_leak_corr->SetName(Form("Ileak_%i", detid));
+        h_I_leak_corr->Write();
+
+            TCanvas * c4 = new TCanvas();
+        c4->cd();
+			title.Form("Full depletion voltage (%s%i)", "TEC_R5_W9_", detid);	
+
+        // h_U->SetTitle(title);
+        h_U->GetXaxis()->SetTimeDisplay(1);
+	//h_U->GetXaxis()->SetTimeFormat("#splitline{%Y}{%d/%m}");
+        h_U->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_U->SetLineColor(kBlack);
+        h_U->GetXaxis()->SetTitle("Time");
+        h_U->GetYaxis()->SetTitle("Full depletion voltage (V)");
+        h_U->DrawCopy();
+        name.Form("VdepEvol_Vdep_%s%i.png", "TEC_R5_W9_", detid);
+                //t->Draw();
+        c4->SaveAs(name);
+
+
+        h_U->SetName(Form("Vdep_%i", detid));
+        h_U->Write();
+
+                TCanvas * c5 = new TCanvas();
+        c5->cd();
+        title.Form("Effective space charge (%s, DETID: %i)","TEC_R5_W9_", detid);
+        // h_N->SetTitle(title);
+        //	h_N->GetXaxis()->SetTimeDisplay(1);
+        //	h_N->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_N->GetXaxis()->SetTitle("Time (steps)");
+        h_N->GetYaxis()->SetTitle("Effective space charge (cm-3)");
+        h_N->DrawCopy();
+        h_Nc->SetLineColor(kBlue);
+        h_Nc->DrawCopy("SAME");
+        h_Na->SetLineColor(kGreen);
+        h_Na->DrawCopy("SAME");
+        h_NY->SetLineColor(kRed);
+        h_NY->DrawCopy("SAME");
+        name.Form("VdepEvol_Ncontrib_%s%i.png", "TEC_R5_W9_", detid);
+
+        //t->Draw();
+        c5->SaveAs(name);
+        h_N->SetName(Form("N_%i", detid));
+        h_N->Write();
+        h_Nc->SetName(Form("Nc_%i", detid));
+        h_Nc->Write();
+        h_Na->SetName(Form("Na_%i", detid));
+        h_Na->Write();
+        h_NY->SetName(Form("NY_%i", detid));
+        h_NY->Write();
+        
+        
+        c5->cd();
+        title.Form("Effective space charge contributions (%s, DETID: %i)", "TEC_R5_W9_", detid);
+        // h_N->SetTitle(title);
+        //	h_N-dGetXaxis()->SetTimeDisplay(1);
+        //	h_N->GetXaxis()->SetTimeFormat("%d\/%m\/%y%F2010-01-01 00:00:00");
+        h_N->GetXaxis()->SetTitle("Time (steps)");
+        h_N->GetYaxis()->SetTitle("Effective space charge (cm-3)");
+        h_N->DrawCopy();
+        name.Form("VdepEvol_Neff_%s%i.png", "TEC_R5_W9_", detid);
+
+        //t->Draw();
+        c5->SaveAs(name);
+
+
+            TCanvas * cgr = new TCanvas();
+    cgr->cd();
+    //setTDRStyle();
+    
+
+    title.Form("Vdep vs Lumi,%s%i", "TEC_R5_W9_", detid);
+    name.Form("VdepEvol_VdepvsLumi_%s%i.png", "TEC_R5_W9_", detid);
+    lumigr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
+    lumigr->GetHistogram()->GetXaxis()->SetTitle("Int. luminosity (fb^{-1})");
+    lumigr->GetHistogram()->GetXaxis()->SetRangeUser(0,600);
+    // lumigr->SetTitle(title);
+    lumigr->SetName(name);
+    lumigr->SetLineColor(1);
+    lumigr->Draw("alp");
+
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    lumigr->SetName(Form("lumigr_%i", detid));
+    lumigr->SaveAs(Form("lumigr_%s%i.root", "TEC_R5_W9_", detid));
+    lumigr->Write();
+    
+        DeltaVdep->GetHistogram()->GetYaxis()->SetTitle("Delta Full depletion voltage [ V ]");
+    DeltaVdep->GetHistogram()->GetXaxis()->SetTitle("Integrated luminosity [ fb^{ -1} ]");
+    DeltaVdep->GetHistogram()->GetYaxis()->SetRangeUser(-350,200);
+    DeltaVdep->GetHistogram()->GetXaxis()->SetRangeUser(0,600);
+    // DeltaVdep->SetTitle(title);
+    DeltaVdep->SetName(name);
+    DeltaVdep->SetLineColor(1);
+    DeltaVdep->SetLineWidth(4);
+    DeltaVdep->Draw("alp");
+         
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    DeltaVdep->SetName(Form("DeltaVdep_%s%i", "TEC_R5_W9", detid));
+    DeltaVdep->SaveAs(Form("DeltaVdep_%s%i.root", "TEC_R5_W9", detid));
+    DeltaVdep->Write();
+
+
+    title.Form("Vdep vs Fluence,%s%i", "TEC_R5_W9_", detid);
+    name.Form("VdepEvol_VdepvsFeq_%i.png", detid);
+    feqgr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
+    feqgr->GetHistogram()->GetXaxis()->SetTitle("Fluence (1MeV neq/cm^{-2})");
+    // feqgr->SetTitle(title);
+    feqgr->SetName(name);
+    feqgr->SetLineColor(1);
+    feqgr->Draw("alp");
+
+        //t->Draw();
+    if(print_plots) cgr->SaveAs(name);
+    feqgr->SetName(Form("feqgr_%i", detid));
+    feqgr->Write();
+    
+    title.Form("Vdep vs Time, %s%i", "TEC_R5_W9_", detid);
+    name.Form("VdepEvol_VdepvsTime_%s%i.png", "TEC_R5_W9_", detid);
     timegr->GetHistogram()->GetYaxis()->SetTitle("Full depletion voltage (V)");
     timegr->GetHistogram()->GetXaxis()->SetTitle("Time since end of Run3(days)");
     timegr->GetHistogram()->SetAxisRange(-1000,1000);
@@ -1252,12 +1525,76 @@ void HamburgModelFactory::runSimuForAllModules(int option=1, bool saveTree=false
         if(option==4) // random hot modules
             if(temp<20 || idet%10!=0) continue;
 
+
+        if (option == 5)
+            { 
+                if ( detid != 470177449 && detid != 470177958 && detid != 470176941 && detid != 470177450 && detid != 470176942
+                    && detid != 470440105 && detid != 470177961 && detid != 470177453 && detid != 470177962 && detid != 470177454 && detid != 470440109
+                    && detid != 470177965 && detid != 470177966 && detid != 470442661 && detid != 470180517 && detid != 470442662 && detid != 470180518
+                    && detid != 470443173 && detid != 470181029 && detid != 470442665 && detid != 470180521 && detid != 470181030 && detid != 470180522
+                    && detid != 470443685 && detid != 470181541 && detid != 470443177 && detid != 470443686 && detid != 470181033 && detid != 470181542
+                    && detid != 470443178 && detid != 470181034 && detid != 470444197 && detid != 470182053 && detid != 470181545 && detid != 470182054
+                    && detid != 470443690 && detid != 470181546 && detid != 470182057 && detid != 470182058 && detid != 470440101 && detid != 470444198
+                    && detid != 470440102 && detid != 470443174 && detid != 470443689 && detid != 470439593 && detid != 470439594 && detid != 470444201
+                    && detid != 470439085 && detid != 470439086 && detid != 470439597 && detid != 470444202 && detid != 470440106 && detid != 470439598
+                    && detid != 470442666 && detid != 470438574 && detid != 470438573 && detid != 470440110 && detid != 470176430 && detid != 470438309
+                    && detid != 470176165 && detid != 470438310 && detid != 470176166 && detid != 470438821 && detid != 470176677 && detid != 470438313
+                    && detid != 470438822 && detid != 470176169 && detid != 470176678 && detid != 470438314 && detid != 470176170 && detid != 470439333
+                    && detid != 470177189 && detid != 470438825 && detid != 470439334 && detid != 470176681 && detid != 470177190 && detid != 470176173
+                    && detid != 470438826 && detid != 470176682 && detid != 470439845 && detid != 470177701 && detid != 470439337 && detid != 470177193
+                    && detid != 470177702 && detid != 470176685 && detid != 470177194 && detid != 470176686 && detid != 470177705 && detid != 470177197
+                    && detid != 470177706 && detid != 470177198 && detid != 470177709 && detid != 470177710 && detid != 470180261 && detid != 470180262
+                    && detid != 470442917 && detid != 470180773 && detid != 470442409 && detid != 470180265 && detid != 470180774 && detid != 470442410
+                    && detid != 470180266 && detid != 470443429 && detid != 470181285 && detid != 470442921 && detid != 470443430 && detid != 470180777
+                    && detid != 470181286 && detid != 470176938 && detid != 470442922 && detid != 470180778 && detid != 470443941 && detid != 470181797
+                    && detid != 470443433 && detid != 470443942 && detid != 470181289 && detid != 470181798 && detid != 470181290 && detid != 470181801
+                    && detid != 470181802 && detid != 470442405 && detid != 470439846 && detid != 470442406 && detid != 470442918 && detid != 470443945
+                    && detid != 470439338 && detid != 470439849 && detid != 470443946 && detid != 470439341 && detid != 470438829 && detid != 470439850 && detid != 470439342 && detid != 470439853
+                    && detid != 470439854 && detid != 470443434 && detid != 470438318 && detid != 470438317 && detid != 470438830 && detid != 470176174
+                    && detid != 470438565 && detid != 470176421 && detid != 470438566 && detid != 470176422 && detid != 470439077 && detid != 470176933 && detid != 470438569 && detid != 470439078
+                    && detid != 470176425 && detid != 470176934 && detid != 470438570 && detid != 470176426 && detid != 470439589 && detid != 470177445 && detid != 470439081 && detid != 470439590
+                    && detid != 470176937 && detid != 470177446 && detid != 470176429 && detid != 470439082
+                    && detid != 470177957 )
+                    {continue;}
+
+            }
         std::cout << " doing calculations for detid " << detid << std::endl;
         std::cout << "   fluence: " <<fluence_7000TeV<< " Ton: "<<temp<<" ini_leak: "<<ini_leak<<" ini_vdep: "<<ini_vdep<< std::endl;
         
         simulateSensorEvolution(detid);//VDEPF[idet] = 
         if(detid==369120278 || detid==369120378 || detid == 369121381 || detid == 369121385  || detid == 369125870) drawSaveSensorSimu(true);
+        else if (detid == 470177449 || detid == 470177958 || detid == 470176941 || detid == 470177450 || detid == 470176942
+            || detid == 470440105 || detid == 470177961 || detid == 470177453 || detid == 470177962 || detid == 470177454 || detid == 470440109
+            || detid == 470177965 || detid == 470177966 || detid == 470442661 || detid == 470180517 || detid == 470442662 || detid == 470180518
+            || detid == 470443173 || detid == 470181029 || detid == 470442665 || detid == 470180521 || detid == 470181030 || detid == 470180522
+            || detid == 470443685 || detid == 470181541 || detid == 470443177 || detid == 470443686 || detid == 470181033 || detid == 470181542
+            || detid == 470443178 || detid == 470181034 || detid == 470444197 || detid == 470182053 || detid == 470181545 || detid == 470182054
+            || detid == 470443690 || detid == 470181546 || detid == 470182057 || detid == 470182058 || detid == 470440101 || detid == 470444198
+            || detid == 470440102 || detid == 470443174 || detid == 470443689 || detid == 470439593 || detid == 470439594 || detid == 470444201
+            || detid == 470439085 || detid == 470439086 || detid == 470439597 || detid == 470444202 || detid == 470440106 || detid == 470439598
+            || detid == 470442666 || detid == 470438574 || detid == 470438573 || detid == 470440110 || detid == 470176430 || detid == 470438309
+            || detid == 470176165 || detid == 470438310 || detid == 470176166 || detid == 470438821 || detid == 470176677 || detid == 470438313
+            || detid == 470438822 || detid == 470176169 || detid == 470176678 || detid == 470438314 || detid == 470176170 || detid == 470439333
+            || detid == 470177189 || detid == 470438825 || detid == 470439334 || detid == 470176681 || detid == 470177190 || detid == 470176173
+            || detid == 470438826 || detid == 470176682 || detid == 470439845 || detid == 470177701 || detid == 470439337 || detid == 470177193
+            || detid == 470177702 || detid == 470176685 || detid == 470177194 || detid == 470176686 || detid == 470177705 || detid == 470177197
+            || detid == 470177706 || detid == 470177198 || detid == 470177709 || detid == 470177710 || detid == 470180261 || detid == 470180262
+            || detid == 470442917 || detid == 470180773 || detid == 470442409 || detid == 470180265 || detid == 470180774 || detid == 470442410
+            || detid == 470180266 || detid == 470443429 || detid == 470181285 || detid == 470442921 || detid == 470443430 || detid == 470180777
+            || detid == 470181286 || detid == 470176938 || detid == 470442922 || detid == 470180778 || detid == 470443941 || detid == 470181797
+            || detid == 470443433 || detid == 470443942 || detid == 470181289 || detid == 470181798 || detid == 470181290 || detid == 470181801
+            || detid == 470181802 || detid == 470442405 || detid == 470439846 || detid == 470442406 || detid == 470442918 || detid == 470443945
+            || detid == 470439338 || detid == 470439849 || detid == 470443946 || detid == 470439341 || detid == 470438829 || detid == 470439850 || detid == 470439342 || detid == 470439853
+            || detid == 470439854 || detid == 470443434 || detid == 470438318 || detid == 470438317 || detid == 470438830 || detid == 470176174
+            || detid == 470438565 || detid == 470176421 || detid == 470438566 || detid == 470176422 || detid == 470439077 || detid == 470176933 || detid == 470438569 || detid == 470439078
+            || detid == 470176425 || detid == 470176934 || detid == 470438570 || detid == 470176426 || detid == 470439589 || detid == 470177445 || detid == 470439081 || detid == 470439590
+            || detid == 470176937 || detid == 470177446 || detid == 470176429 || detid == 470439082 || detid == 470177957  )
+                {
+                    drawSaveSensorSimu(true); 
+                }
         else drawSaveSensorSimu(false);
+
+
         
         if(saveTree) saveSensorSimuInTree();
         

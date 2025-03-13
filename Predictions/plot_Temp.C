@@ -152,10 +152,10 @@ gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
   // leg->AddEntry(hVdep,"Init. V_{fd}","P");
 
 
-  leg->Draw();
+  // leg->Draw();
 //########
 
-           TLine *line = new TLine(415000000,-25,415000000,25);
+           TLine *line = new TLine(475000000,-25,475000000,25);
       line->SetLineWidth(6);
    line->SetLineStyle(2);
    line->SetLineColor(kRed);
@@ -174,7 +174,7 @@ gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
         t2->SetTextAngle(90);
         t2->SetTextSize(0.4*fac);
         t2->SetTextColor(kRed);
-        t2->DrawLatex(430000000,10,"Predictions");
+        t2->DrawLatex(500000000,10,"Predictions");
   //########
 
                 TLatex *t3 = new TLatex(57500000,26,"Preliminary");
@@ -185,7 +185,7 @@ gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
 
   //########
 
-                TLatex *t5 = new TLatex(-20000000,-29,"01/10    01/12    01/14    01/16    01/18    01/20    01/22    01/24    01/26");
+                TLatex *t5 = new TLatex(-20000000,-28.5,"01/10   01/12   01/14    01/16   01/18   01/20   01/22  01/24  01/26");
         t5->SetTextFont(42);
         t5->SetTextAlign(1);
         t5->SetTextSize(0.6*fac);

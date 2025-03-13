@@ -30,9 +30,9 @@ void mergeFiles() {
 
     int count = 0;
     // Parcourir tous les fichiers du répertoire
-    while ((file = gSystem->GetDirEntry(dir))) {
-        TString fileName(file);
-        
+    while (count<20) { //(file = gSystem->GetDirEntry(dir))
+        // TString fileName(file);//file or fileNamesIn[count]
+        TString fileName = fileNamesOut[count]+".root";
         // Sélectionner uniquement les fichiers qui commencent par "lumigr_"
         if (fileName.BeginsWith("lumigr_") && fileName.EndsWith(".root")) {
 
@@ -44,7 +44,7 @@ void mergeFiles() {
             }
             size_t pos = fileName.Index(".");
             TString firstPart = fileName(0, pos);        // Avant le séparateur
-
+            std::cout << "fileNamesIn[count] : " << fileNamesIn[count] << std::endl;
             TGraph* graph = (TGraph*) inputFile->Get(fileNamesIn[count]);
             if (!graph) {
                 std::cerr << "TGraph introuvable dans le fichier : " << fileName << std::endl;
@@ -55,8 +55,9 @@ void mergeFiles() {
             graphList->Add(graph->Clone());  // On clone pour ne pas pointer vers le fichier d'origine
 
             inputFile->Close();
-            count++;
+            
         }
+        count++;
     }
     gSystem->FreeDirectory(dir);
 

@@ -26,7 +26,7 @@ void plot()//std::vector<string> SampleList or string plot
     //     }
 //  TFile *f1, *f2, *f3, *f4, *f5, *f6, *f7, *f8, *f9, *f10, *f11, *f12, *f13, *f14, *f15, *f16, *f17, *f18, *f19, *f20;
  
-TFile * f1 = new TFile("./VdepEvol_T_TIB_L3.root");    
+TFile * f1 = new TFile("./VdepEvol_T_base.root");    
 
  
 int stati=0;
@@ -152,7 +152,7 @@ gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
   // leg->AddEntry(hVdep,"Init. V_{fd}","P");
 
 
-  leg->Draw();
+  // leg->Draw();
 //########
 
            TLine *line = new TLine(415000000,-25,415000000,25);

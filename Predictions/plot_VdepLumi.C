@@ -126,7 +126,7 @@ gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
     // f1->ls();
     const int nbin = 5844;
     TGraph * hVdep = new TGraph(nbin);
-    hVdep = (TGraph*)f1->Get("lumigr_TIB_L1.png");
+    hVdep = (TGraph*)f1->Get("lumigr_TIB_L1");
     // hVdep->GetXaxis()->SetTimeDisplay(1);
     // hVdep->GetXaxis()->SetTimeFormat("%d/%m/%y%F2010-01-01 00:00:00");
 
@@ -136,7 +136,7 @@ gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
     hVdep->GetXaxis()->SetLabelSize(0.04);
     hVdep->GetYaxis()->SetLabelSize(0.04);
     hVdep->GetHistogram()->GetXaxis()->SetTitleOffset(1.01);
-    hVdep->GetHistogram()->GetXaxis()->SetRangeUser(0,457.2);
+    hVdep->GetHistogram()->GetXaxis()->SetRangeUser(0,600);
     hVdep->SetLineColor(kBlack);
     hVdep->Draw();
 
@@ -154,7 +154,7 @@ gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
 //   leg->Draw();
 //########
 
-           TLine *line = new TLine(235,0,235,350);
+           TLine *line = new TLine(397,0,397,350);
       line->SetLineWidth(6);
    line->SetLineStyle(2);
    line->SetLineColor(kRed);
@@ -171,17 +171,17 @@ gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
        t2->SetTextFont(52);
        t2->SetTextAlign(11);
        t2->SetTextSize(0.5*fac);
-       t2->DrawLatex(18,310,"Expected Run 3 L_{int} = 260 fb^{-1}");
+       t2->DrawLatex(18,310,"Expected L_{int}^{2025+2026} = 150 fb^{-1}");
   // ########
 
-        TLatex *t3 = new TLatex(55,355,"Simulation");
+        TLatex *t3 = new TLatex(70,355,"Simulation");
         t3->SetTextFont(52);
         t3->SetTextAlign(11);
         t3->SetTextSize(0.5*fac);
         t3->Draw();
   //########
 
-                TLatex *t4 = new TLatex(285,355,"Tracker Inner Barrel Layer 1");
+                TLatex *t4 = new TLatex(373,355,"Tracker Inner Barrel Layer 1");
         t4->SetTextFont(42);
         t4->SetTextAlign(11);
         t4->SetTextSize(0.5*fac);
@@ -193,7 +193,7 @@ gStyle->SetPadTickX(1); gStyle->SetPadTickY(1);
         t6->SetTextAngle(90);
         t6->SetTextSize(0.4*fac);
         t6->SetTextColor(kRed);
-        t6->DrawLatex(250,250,"Predictions");
+        t6->DrawLatex(420,120,"Predictions");
 
  c1->Update();
  c1->SaveAs("VdepIntLumi_v2.pdf");
