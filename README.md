@@ -14,7 +14,9 @@ The last one used is MakeRun20252026Scenario(0,0) => (0,0) are the only value po
 The predictions are made day by day. What we call periods in the code are set of 5 days. So in a year, there are 73 periods of 5 days.
 
 The code will produce a txt file  like "realistic_scenario_2025_2026.txt"
+
 !! It does not contain the data. First, you have to check the indices of the days of both data and simulation files and see if there are matching.
+
 => Like "realistic_scenario_2025_2026.txt" starts at 5392 since there is a
 shiftdays parameter of 5391.
 
@@ -39,13 +41,17 @@ The reference scenario with the data is : public/VdepEvolution/Predictions/Input
 The last scenario used is : public/VdepEvolution/Predictions/Inputs/realistic_scenario_150fb_2025_2026.txt
 
 The Hamburg Model is used to make the predictions, see : public/VdepEvolution/Predictions/include/HamburgModelFactory.cc.
+
 The two functions to look at are "runSimuForAllModules" and "runSimuForAvgModules".
+
 In the first one, you can actually select the modules you wan to run on (good for analysing spcific Power Supplies). The second one makes the predictions averaging the behavior of all the modules of a layer/ ring
 
 With these two functions comes two way of making the predictions :
+
 !! please check the input and the parameters before running the code !!
 
 public/VdepEvolution/Predictions/ComputeVdepEvolution.C (make)
+
 public/VdepEvolution/Predictions/ComputeVdepEvolution_perlayer.C (make)
 
 When you are done with that, yo ucan make the plots. There are many you can produce (using root to compile with .L):
